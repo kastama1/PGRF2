@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
-public class RasterBufferedImage implements Raster {
+public class RasterBufferedImage implements Raster<Integer> {
 
     private final BufferedImage img;
     private int clearColor;
@@ -15,7 +15,6 @@ public class RasterBufferedImage implements Raster {
 
     public void repaint(Graphics graphics) {
         graphics.drawImage(img, 0, 0, null);
-        // pro zájemce - co dělá observer - https://stackoverflow.com/a/1684476
     }
 
     public void draw(RasterBufferedImage raster) {
@@ -34,7 +33,7 @@ public class RasterBufferedImage implements Raster {
     }
 
     @Override
-    public Optional<Integer> getPixel(int x, int y) {
+    public Optional<Integer> getElement(int x, int y) {
         if (x >= 0 && y >= 0 && x < getWidth() && y < getHeight()) {
             return Optional.of(img.getRGB(x, y));
         } else {
@@ -43,7 +42,7 @@ public class RasterBufferedImage implements Raster {
     }
 
     @Override
-    public void setPixel(int x, int y, int color) {
+    public void setElement(int x, int y, Integer color) {
         if (x >= 0 && y >= 0 && x < getWidth() && y < getHeight()) {
             img.setRGB(x, y, color);
         }
@@ -57,8 +56,8 @@ public class RasterBufferedImage implements Raster {
     }
 
     @Override
-    public void setClearColor(int clearColor) {
-        this.clearColor = clearColor;
+    public void setClearValue(Integer clearValue) {
+        this.clearColor = clearValue;
     }
 
     @Override

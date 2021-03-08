@@ -2,19 +2,19 @@ package streda_16_35_c05.rasterize;
 
 import java.util.Optional;
 
-public interface Raster {
+public interface Raster<T> {
 
     /**
-     * Clear canvas
+     * Clear raster
      */
     void clear();
 
     /**
      * Set clear color
      *
-     * @param clearColor clear color
+     * @param clearValue clear color
      */
-    void setClearColor(int clearColor);
+    void setClearValue(T clearValue);
 
     /**
      * Get horizontal size
@@ -31,21 +31,14 @@ public interface Raster {
     int getHeight();
 
     /**
-     * Get pixel color at [x,y] position
+     * Get value at [x,y] position
      *
      * @param x horizontal coordinate
      * @param y vertical coordinate
      * @return pixel color
      */
-    Optional<Integer> getPixel(int x, int y);
+    Optional<T> getElement(int x, int y);
 
-    /**
-     * Set pixel color at [x,y] position
-     *
-     * @param x     horizontal coordinate
-     * @param y     vertical coordinate
-     * @param color pixel color
-     */
-    void setPixel(int x, int y, int color);
+    void setElement(int x, int y, T value);
 
 }
