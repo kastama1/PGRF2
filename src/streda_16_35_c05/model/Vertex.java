@@ -11,12 +11,12 @@ public class Vertex {
 
     private final Point3D point;
     private final Col color;
-    //private final Vec2D textCoord;
+    private final Vec2D textCoord;
 
-    public Vertex(Point3D point, Col color) {
+    public Vertex(Point3D point, Col color, Vec2D textCoord) {
         this.point = point;
         this.color = color;
-        //this.textCoord = textCoord;
+        this.textCoord = textCoord;
     }
 
     public Point3D getPoint() {
@@ -43,15 +43,19 @@ public class Vertex {
         return point.getW();
     }
 
+    public Vec2D getTextCoord() {
+        return textCoord;
+    }
+
     public Vertex mul(double t) {
-        return new Vertex(point.mul(t), color.mul(t));
+        return new Vertex(point.mul(t), color.mul(t), textCoord.mul(t));
     }
 
     public Vertex add(Vertex v) {
-        return new Vertex(point.add(v.getPoint()), color.add(v.getColor()));
+        return new Vertex(point.add(v.getPoint()), color.add(v.getColor()), textCoord.add(v.getTextCoord()));
     }
 
     public Optional<Vertex> dehomog() {
-        return point.dehomog().map(vec3D -> new Vertex(new Point3D(vec3D), color));
+        return point.dehomog().map(vec3D -> new Vertex(new Point3D(vec3D), color, textCoord));
     }
 }

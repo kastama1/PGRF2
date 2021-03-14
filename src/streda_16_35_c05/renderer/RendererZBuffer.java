@@ -63,9 +63,9 @@ public class RendererZBuffer implements GPURenderer {
 
     private void prepareTriangle(Vertex v1, Vertex v2, Vertex v3) {
 
-        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor());
-        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor());
-        Vertex c = new Vertex(v3.getPoint().mul(model).mul(view).mul(projection), v3.getColor());
+        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor(), v1.getTextCoord());
+        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor(), v2.getTextCoord());
+        Vertex c = new Vertex(v3.getPoint().mul(model).mul(view).mul(projection), v3.getColor(), v3.getTextCoord());
 
         if ((a.getX() > a.getW() && b.getX() > b.getW() && c.getX() > c.getW()) ||
                 (a.getX() < -a.getW() && b.getX() < -b.getW() && c.getX() < -c.getW()) ||
@@ -117,8 +117,8 @@ public class RendererZBuffer implements GPURenderer {
 
     private void prepareLine(Vertex v1, Vertex v2) {
 
-        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor());
-        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor());
+        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor(), v1.getTextCoord());
+        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor(), v2.getTextCoord());
 
         if ((a.getX() > a.getW() && b.getX() > b.getW()) ||
                 (a.getX() < -a.getW() && b.getX() < -b.getW()) ||
@@ -138,7 +138,6 @@ public class RendererZBuffer implements GPURenderer {
         } else if (b.getZ() < 0) {
             double t1 = (0 - a.getZ()) / (b.getZ() - a.getZ());
             Vertex ab = a.mul(1 - t1).add(b.mul(t1));
-
             drawLine(a, ab);
         } else {
             drawLine(a, b);
@@ -258,14 +257,9 @@ public class RendererZBuffer implements GPURenderer {
                     difference = difference + dx;
                     y1 = y1 + shift_y;
                 }
-                double t1 = (y1 - a.getY()) / (b.getY() - a.getY());
-                Vertex finalVertex = a.mul(1 - t1).add(b.mul(t1));
 
-                double t2 = (x1 - a.getX()) / (finalVertex.getX() - a.getX());
-                finalVertex = a.mul(1 - t2).add(b.mul(t2));
-
-                final Col finalColor = shader.shade(finalVertex);
-                drawPixel(x1, y1, finalVertex.getZ(), finalColor);
+                final Col finalColor = shader.shade(a);
+                drawPixel(x1, y1, a.getZ(), finalColor);
             }
         }
     }
@@ -277,7 +271,7 @@ public class RendererZBuffer implements GPURenderer {
                 // máme <0;2> -> vynásobíme polovinou velikosti plátna
                 .mul(new Vec3D(imageRaster.getWidth() / 2f, imageRaster.getHeight() / 2f, 1));
 
-        return new Vertex(new Point3D(vec3D), vertex.getColor());
+        return new Vertex(new Point3D(vec3D), vertex.getColor(), vertex.getTextCoord());
     }
 
     private void fillLine(long y, Vertex a, Vertex b) {
