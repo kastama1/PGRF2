@@ -1,5 +1,6 @@
 package streda_16_35_c05.rasterize;
 
+import java.awt.*;
 import java.util.Optional;
 
 public interface Raster<T> {
@@ -40,5 +41,7 @@ public interface Raster<T> {
     Optional<T> getElement(int x, int y);
 
     void setElement(int x, int y, T value);
+
+    Graphics getGraphics();
 
 }

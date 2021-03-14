@@ -1,5 +1,6 @@
 package streda_16_35_c05.rasterize;
 
+import java.awt.*;
 import java.util.Optional;
 
 public class DepthBuffer implements Raster<Double> {
@@ -56,5 +57,10 @@ public class DepthBuffer implements Raster<Double> {
         if (x >= 0 && y >= 0 && x < getWidth() && y < getHeight()) {
             data[x][y] = z;
         }
+    }
+
+    @Override
+    public Graphics getGraphics() {
+        return null;
     }
 }

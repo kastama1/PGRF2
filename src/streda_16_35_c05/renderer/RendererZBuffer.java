@@ -3,13 +3,11 @@ package streda_16_35_c05.renderer;
 import streda_16_35_c05.model.Element;
 import streda_16_35_c05.model.TopologyType;
 import streda_16_35_c05.model.Vertex;
-import streda_16_35_c05.movement.Movement;
 import streda_16_35_c05.rasterize.DepthBuffer;
-import streda_16_35_c05.rasterize.LineRasterizerGraphics;
 import streda_16_35_c05.rasterize.Raster;
+import streda_16_35_c05.shader.Shader;
 import transforms.*;
 
-import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,10 +15,11 @@ public class RendererZBuffer implements GPURenderer {
 
     private final Raster<Integer> imageRaster;
     private final Raster<Double> depthBuffer;
-    private final LineRasterizerGraphics lineRasterizerGraphics;
-    private boolean wireframe;
+
+    boolean wireframe = false;
 
     private Mat4 model, view, projection;
+    private Shader<Vertex, Col> shader;
 
     public RendererZBuffer(Raster<Integer> imageRaster) {
         this.imageRaster = imageRaster;
@@ -29,8 +28,6 @@ public class RendererZBuffer implements GPURenderer {
         model = new Mat4Identity();
         view = new Mat4Identity();
         projection = new Mat4Identity();
-
-        lineRasterizerGraphics = new LineRasterizerGraphics(imageRaster);
     }
 
     @Override
@@ -39,6 +36,7 @@ public class RendererZBuffer implements GPURenderer {
             final TopologyType topologyType = element.getTopologyType();
             final int start = element.getStart();
             final int count = element.getCount();
+            model = element.getModel();
 
             if (topologyType == TopologyType.TRIANGLE) {
                 for (int i = start; i < start + count; i += 3) {
@@ -65,14 +63,10 @@ public class RendererZBuffer implements GPURenderer {
 
     private void prepareTriangle(Vertex v1, Vertex v2, Vertex v3) {
 
-        // 1. transformace vrcholů
         Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor());
         Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor());
         Vertex c = new Vertex(v3.getPoint().mul(model).mul(view).mul(projection), v3.getColor());
 
-        // 2. ořezání
-        // ořezat trojúhelníky, které jsou CELÉ mimo zobrazovací objem
-        // slide 93
         if ((a.getX() > a.getW() && b.getX() > b.getW() && c.getX() > c.getW()) ||
                 (a.getX() < -a.getW() && b.getX() < -b.getW() && c.getX() < -c.getW()) ||
                 (a.getY() > a.getW() && b.getY() > b.getW() && c.getY() > c.getW()) ||
@@ -80,8 +74,6 @@ public class RendererZBuffer implements GPURenderer {
                 (a.getZ() > a.getW() && b.getZ() > b.getW() && c.getZ() > c.getW()) ||
                 (a.getZ() < 0 && b.getZ() < 0 && c.getZ() < 0)) return;
 
-        // 3. seřazení vrcholů podle Z (a.z > b.z > c.z)
-        // slide 97
         if (a.getZ() < b.getZ()) {
             Vertex temp = a;
             a = b;
@@ -92,44 +84,73 @@ public class RendererZBuffer implements GPURenderer {
             b = c;
             c = temp;
         }
-        // teď je v C vrchol, jehož Z je k nám nejblíže (je nejmenší, může být i za námi)
         if (a.getZ() < b.getZ()) {
             Vertex temp = a;
             a = b;
             b = temp;
         }
-        // teď máme seřazeno - Z od největšího po nejmenší: A,B,C
 
-        // 4. ořezání podle hrany Z
         if (a.getZ() < 0) {
-            // A.Z je menší než nula => všehcny Z jsou menší než nula => není co zobrazit (vše je za námi)
             return;
         } else if (b.getZ() < 0) {
-            // vrchol A je vidět, vrcholy B,C nejsou
-
-            // odečíst minimum, dělit rozsahem
             double t1 = (0 - a.getZ()) / (b.getZ() - a.getZ());
-            // 0 -> protože nový vrchol má mít Z souřadnici 0
             Vertex ab = a.mul(1 - t1).add(b.mul(t1));
-//            System.out.println(t1);
 
             double t2 = (0 - a.getZ()) / (c.getZ() - a.getZ());
             Vertex ac = a.mul(1 - t2).add(c.mul(t2));
-
-            drawTriangle(a, ab, ac);
+            drawLineOrTriangle(a, ab, ac);
 
         } else if (c.getZ() < 0) {
             double t1 = (0 - b.getZ()) / (c.getZ() - b.getZ());
             Vertex bc = b.mul(1 - t1).add(c.mul(t1));
-            drawTriangle(a, b, bc);
+            drawLineOrTriangle(a, b, bc);
 
             double t2 = (0 - a.getZ()) / (c.getZ() - a.getZ());
             Vertex ac = a.mul(1 - t2).add(c.mul(t2));
 
-            drawTriangle(a, bc, ac);
+            drawLineOrTriangle(a, bc, ac);
 
         } else {
-            // vidíme celý trojúhelník (podle Z)
+            drawLineOrTriangle(a, b, c);
+        }
+    }
+
+    private void prepareLine(Vertex v1, Vertex v2) {
+
+        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor());
+        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor());
+
+        if ((a.getX() > a.getW() && b.getX() > b.getW()) ||
+                (a.getX() < -a.getW() && b.getX() < -b.getW()) ||
+                (a.getY() > a.getW() && b.getY() > b.getW()) ||
+                (a.getY() < -a.getW() && b.getY() < -b.getW()) ||
+                (a.getZ() > a.getW() && b.getZ() > b.getW()) ||
+                (a.getZ() < 0 && b.getZ() < 0)) return;
+
+        if (a.getZ() < b.getZ()) {
+            Vertex temp = a;
+            a = b;
+            b = temp;
+        }
+
+        if (a.getZ() < 0) {
+            return;
+        } else if (b.getZ() < 0) {
+            double t1 = (0 - a.getZ()) / (b.getZ() - a.getZ());
+            Vertex ab = a.mul(1 - t1).add(b.mul(t1));
+
+            drawLine(a, ab);
+        } else {
+            drawLine(a, b);
+        }
+    }
+
+    private void drawLineOrTriangle(Vertex a, Vertex b, Vertex c) {
+        if (wireframe) {
+            drawLine(a, b);
+            drawLine(b, c);
+            drawLine(a, c);
+        } else {
             drawTriangle(a, b, c);
         }
     }
@@ -167,84 +188,32 @@ public class RendererZBuffer implements GPURenderer {
             b = temp;
         }
 
-        // slide 124
-        // A -> B
-        if (wireframe) {
-            long start = (long) Math.max(Math.ceil(a.getY()), 0);
-            double end = Math.min(b.getY(), imageRaster.getHeight() - 1);
+        long start = (long) Math.max(Math.ceil(a.getY()), 0);
+        double end = Math.min(b.getY(), imageRaster.getHeight() - 1);
 
-            for (long y = start; y <= end; y++) {
-                double t1 = (y - a.getY()) / (b.getY() - a.getY());
-                double t2 = (y - a.getY()) / (c.getY() - a.getY());
+        for (long y = start; y <= end; y++) {
+            double t1 = (y - a.getY()) / (b.getY() - a.getY());
+            double t2 = (y - a.getY()) / (c.getY() - a.getY());
 
-                Vertex ab = a.mul(1 - t1).add(b.mul(t1));
-                Vertex ac = a.mul(1 - t2).add(c.mul(t2));
-
-                fillLine(y, ab, ac);
-            }
-
-            // B -> C
-
-            start = (long) Math.max(Math.ceil(b.getY()), 0);
-            end = Math.min(c.getY(), imageRaster.getWidth() - 1);
-
-            for (long y = start; y <= end; y++) {
-                double t1 = (y - b.getY()) / (c.getY() - b.getY());
-                double t2 = (y - a.getY()) / (c.getY() - a.getY());
-
-                Vertex bc = b.mul(1 - t1).add(c.mul(t1));
-                Vertex ac = a.mul(1 - t2).add(c.mul(t2));
-
-                fillLine(y, bc, ac);
-            }
-        } else {
-            lineRasterizerGraphics.rasterize((int) a.getX(), (int) a.getY(), (int) b.getX(), (int) b.getY(), new Color(b.getColor().getRGB()));
-        }
-    }
-
-    private void prepareLine(Vertex v1, Vertex v2) {
-
-        // 1. transformace vrcholů
-        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor());
-        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor());
-
-        // 2. ořezání
-        // ořezat trojúhelníky, které jsou CELÉ mimo zobrazovací objem
-        // slide 93
-        if ((a.getX() > a.getW() && b.getX() > b.getW()) ||
-                (a.getX() < -a.getW() && b.getX() < -b.getW()) ||
-                (a.getY() > a.getW() && b.getY() > b.getW()) ||
-                (a.getY() < -a.getW() && b.getY() < -b.getW()) ||
-                (a.getZ() > a.getW() && b.getZ() > b.getW()) ||
-                (a.getZ() < 0 && b.getZ() < 0)) return;
-
-        // 3. seřazení vrcholů podle Z (a.z > b.z > c.z)
-        // slide 97
-        if (a.getZ() < b.getZ()) {
-            Vertex temp = a;
-            a = b;
-            b = temp;
-        }
-        // teď máme seřazeno - Z od největšího po nejmenší: A,B,C
-
-        // 4. ořezání podle hrany Z
-        if (a.getZ() < 0) {
-            // A.Z je menší než nula => všehcny Z jsou menší než nula => není co zobrazit (vše je za námi)
-            return;
-        } else if (b.getZ() < 0) {
-            // vrchol A je vidět, vrcholy B,C nejsou
-
-            // odečíst minimum, dělit rozsahem
-            double t1 = (0 - a.getZ()) / (b.getZ() - a.getZ());
-            // 0 -> protože nový vrchol má mít Z souřadnici 0
             Vertex ab = a.mul(1 - t1).add(b.mul(t1));
-//            System.out.println(t1);
+            Vertex ac = a.mul(1 - t2).add(c.mul(t2));
 
-            drawLine(a, ab);
-        } else {
-            // vidíme celý trojúhelník (podle Z)
-            drawLine(a, b);
+            fillLine(y, ab, ac);
         }
+
+        start = (long) Math.max(Math.ceil(b.getY()), 0);
+        end = Math.min(c.getY(), imageRaster.getWidth() - 1);
+
+        for (long y = start; y <= end; y++) {
+            double t1 = (y - b.getY()) / (c.getY() - b.getY());
+            double t2 = (y - a.getY()) / (c.getY() - a.getY());
+
+            Vertex bc = b.mul(1 - t1).add(c.mul(t1));
+            Vertex ac = a.mul(1 - t2).add(c.mul(t2));
+
+            fillLine(y, bc, ac);
+        }
+
     }
 
     private void drawLine(Vertex a, Vertex b) {
@@ -259,13 +228,46 @@ public class RendererZBuffer implements GPURenderer {
         a = transformToWindow(a);
         b = transformToWindow(b);
 
-        if (a.getY() > b.getY()) {
-            Vertex temp = a;
-            a = b;
-            b = temp;
-        }
+        int x1 = (int) a.getX();
+        int x2 = (int) b.getX();
+        int y1 = (int) a.getY();
+        int y2 = (int) b.getY();
 
-        lineRasterizerGraphics.rasterize((int) a.getX(), (int) a.getY(), (int) b.getX(), (int) b.getY(), new Color(b.getColor().getRGB()));
+        if ((x1 == x2) && (y1 == y2)) {
+            drawPixel(x1, y1, a.getZ(), a.getColor());
+
+        } else {
+            int dx = Math.abs(x2 - x1);
+            int dy = Math.abs(y2 - y1);
+            int difference = dx - dy;
+
+            int shift_x, shift_y;
+
+            if (x1 < x2) shift_x = 1; else shift_x = -1;
+            if (y1 < y2) shift_y = 1; else shift_y = -1;
+
+            while ((x1 != x2) || (y1 != y2)) {
+
+                int p = 2 * difference;
+
+                if (p > -dy) {
+                    difference = difference - dy;
+                    x1 = x1 + shift_x;
+                }
+                if (p < dx) {
+                    difference = difference + dx;
+                    y1 = y1 + shift_y;
+                }
+                double t1 = (y1 - a.getY()) / (b.getY() - a.getY());
+                Vertex finalVertex = a.mul(1 - t1).add(b.mul(t1));
+
+                double t2 = (x1 - a.getX()) / (finalVertex.getX() - a.getX());
+                finalVertex = a.mul(1 - t2).add(b.mul(t2));
+
+                final Col finalColor = shader.shade(finalVertex);
+                drawPixel(x1, y1, finalVertex.getZ(), finalColor);
+            }
+        }
     }
 
     private Vertex transformToWindow(Vertex vertex) {
@@ -292,7 +294,8 @@ public class RendererZBuffer implements GPURenderer {
             double t = (x - a.getX()) / (b.getX() - a.getX());
             Vertex finalVertex = a.mul(1 - t).add(b.mul(t));
 
-            drawPixel((int) x, (int) y, finalVertex.getZ(), finalVertex.getColor());
+            final Col finalColor = shader.shade(finalVertex);
+            drawPixel((int) x, (int) y, finalVertex.getZ(), finalColor);
         }
     }
 
@@ -325,7 +328,18 @@ public class RendererZBuffer implements GPURenderer {
         this.projection = projection;
     }
 
+    @Override
+    public boolean isWireframe() {
+        return wireframe;
+    }
+
+    @Override
     public void setWireframe(boolean wireframe) {
         this.wireframe = wireframe;
+    }
+
+    @Override
+    public void setShader(Shader<Vertex, Col> shader) {
+        this.shader = shader;
     }
 }

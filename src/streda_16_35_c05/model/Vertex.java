@@ -2,6 +2,7 @@ package streda_16_35_c05.model;
 
 import transforms.Col;
 import transforms.Point3D;
+import transforms.Vec2D;
 import transforms.Vec3D;
 
 import java.util.Optional;
@@ -10,10 +11,12 @@ public class Vertex {
 
     private final Point3D point;
     private final Col color;
+    //private final Vec2D textCoord;
 
     public Vertex(Point3D point, Col color) {
         this.point = point;
         this.color = color;
+        //this.textCoord = textCoord;
     }
 
     public Point3D getPoint() {
