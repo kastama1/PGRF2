@@ -14,10 +14,8 @@ import transforms.*;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.Timer;
 
 public class Controller3D {
 
@@ -31,6 +29,9 @@ public class Controller3D {
     private final List<Integer> indexBuffer;
     private final List<Vertex> vertexBuffer;
 
+    Shader<Vertex, Col> shader;
+    Shader<Vertex, Col> shaderTexture;
+
     private Mat4 model, projection, mtScale, mtRotationX, mtRotationY, mtRotationZ, mtTransl;
     private Vec3D transl;
 
@@ -39,11 +40,14 @@ public class Controller3D {
     double rotationX, rotationY, rotationZ;
     double scale = 1;
     boolean rh = true;
-    boolean wireframe = true;
     int activeSolid = 0;
     Element element;
+    int indexEditVertex;
 
-    double x, y;
+    Timer timer;
+    boolean timerRun = false;
+
+    double x, y, xEdit, yEdit;
 
     public Controller3D(Panel panel) {
         this.panel = panel;
@@ -184,7 +188,11 @@ public class Controller3D {
         elementBuffer.add(new Element(TopologyType.TRIANGLE, 3, 3));
         elementBuffer.add(new Element(TopologyType.TRIANGLE, 21, 28));
 
+        shader = v -> new Col(255, 255, 255);
+
         elementBufferTexture.add(new Element(TopologyType.TRIANGLE, 51, 6));
+
+        shaderTexture = new TextureShader();
     }
 
     public void initListener() {
@@ -203,8 +211,37 @@ public class Controller3D {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                x = e.getX();
-                y = e.getY();
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    x = e.getX();
+                    y = e.getY();
+                }
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    xEdit = e.getX();
+                    yEdit = e.getY();
+
+                    double distance = 0;
+                    for (int i = 0; i < vertexBuffer.size(); i++) {
+                        Vertex vertex = vertexBuffer.get(i);
+                        Optional<Vertex> oV = vertex.dehomog();
+                        vertex = oV.get();
+                        vertex = renderer.findPoint(vertex);
+                        double dx = xEdit - vertex.getX();
+                        double dy = yEdit - vertex.getZ();
+                        double d = Math.sqrt((dx * dx) + (dy + dy));
+                        if (d  < 0) {
+                            d = -d;
+                        }
+
+                        if (i == 0) {
+                            distance = d;
+                        }
+
+                        if (distance > d) {
+                            distance = d;
+                            indexEditVertex = i;
+                        }
+                    }
+                }
             }
 
         });
@@ -234,10 +271,21 @@ public class Controller3D {
                             .withZenith(Math.toRadians(zenith))
                             .withAzimuth(Math.toRadians(azimuth));
 
+                } else if(SwingUtilities.isRightMouseButton(e)) {
+                    double speed = 0.01;
+
+                    double dx = e.getX() - xEdit;
+                    double dy = e.getY() - yEdit;
+
+                    Vertex vertex = vertexBuffer.get(indexEditVertex);
+                    Vertex vertexEdit = new Vertex(new Point3D(vertex.getX() - dx * speed, vertex.getY(), vertex.getZ() - dy * speed), vertex.getColor(), vertex.getTextCoord());
+                    vertexBuffer.set(indexEditVertex, vertexEdit);
                 }
                 display();
                 x = e.getX();
                 y = e.getY();
+                xEdit = e.getX();
+                yEdit = e.getY();
             }
         });
 
@@ -295,6 +343,25 @@ public class Controller3D {
                 } else if (e.getKeyCode() == KeyEvent.VK_B) {
                     rh = !rh;
                     projection();
+                } else if (e.getKeyCode() == KeyEvent.VK_F) {
+                    if (timerRun == false) {
+                        timerRun = true;
+                        timer = new Timer();
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                rotationX += 1;
+                                rotationY += 2;
+                                rotationZ += 3;
+                                display();
+                            }
+                        }, 0, 1000 / 20);
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_G) {
+                    if (timerRun == true) {
+                        timer.cancel();
+                        timerRun = false;
+                    }
                 } else if (e.getKeyCode() == KeyEvent.VK_1) {
                     activeSolid = 0;
                 } else if (e.getKeyCode() == KeyEvent.VK_2) {
@@ -351,7 +418,15 @@ public class Controller3D {
                 element = elementBuffer.get(i);
                 model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
                 element.setModel(model);
+                element = elementBufferTexture.get(0);
+                element.setModel(model);
             }
+        } else if (activeSolid == 3) {
+            element = elementBuffer.get(activeSolid - 1);
+            model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
+            element.setModel(model);
+            element = elementBufferTexture.get(0);
+            element.setModel(model);
         } else {
             element = elementBuffer.get(activeSolid - 1);
             model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
@@ -379,11 +454,13 @@ public class Controller3D {
         renderer.draw(elementBufferAxis, indexBuffer, vertexBuffer);
 
         if (renderer.isWireframe()) {
-            renderer.setShader(v -> new Col(255, 255, 255));
+            renderer.setShader(shader);
         }
         renderer.draw(elementBuffer, indexBuffer, vertexBuffer);
 
-        renderer.setShader(new TextureShader());
+        if (!renderer.isWireframe()) {
+            renderer.setShader(shaderTexture);
+        }
         renderer.draw(elementBufferTexture, indexBuffer, vertexBuffer);
 
         panel.repaint();
@@ -393,10 +470,8 @@ public class Controller3D {
         imageRaster.getGraphics().drawString("Movement: [W] Forward [S] Backward [A] Right [D] Left [E] Up [Q] Down | [SPACE] Wireframe [B] Change projection [ENTER] RESET", 10, 20);
         imageRaster.getGraphics().drawString("Transform: [I] Transl y - 1 [K] Transl y + 1 [J] Transl x + 1 " +
                 "[L] Transl x - 1 [O] Transl z + 1 [U] Transl z - 1", 10, 40);
-        imageRaster.getGraphics().drawString("[Scroll up] Scale + 0,1 [Scroll down] Scale - 0,1 | Animation: [G] Start [H] Stop", 10, 60);
+        imageRaster.getGraphics().drawString("[Scroll up] Scale + 0,1 [Scroll down] Scale - 0,1 | Animation: [F] Start [G] Stop", 10, 60);
         imageRaster.getGraphics().drawString("Activation solid: [1] All" + element(), 10, 80);
-        imageRaster.getGraphics().drawString("Activation solid: [1] All" + element(), 10, 80);
-
     }
 
     private String element() {

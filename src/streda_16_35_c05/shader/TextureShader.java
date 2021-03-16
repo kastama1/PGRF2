@@ -15,7 +15,7 @@ public class TextureShader implements Shader<Vertex, Col> {
 
     public TextureShader() {
         try {
-            image = ImageIO.read(new File("576.jpg"));
+            image = ImageIO.read(new File("texture.jpg"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -23,10 +23,11 @@ public class TextureShader implements Shader<Vertex, Col> {
 
     @Override
     public Col shade(Vertex vertex) {
-        int width = image.getWidth();
-        int height = image.getHeight();
+        int width = image.getWidth() - 1;
+        int height = image.getHeight() - 1;
         int texX = (int) Math.floor(vertex.getTextCoord().getX() * width);
         int texY = (int) Math.floor(vertex.getTextCoord().getY() * height);
+        
         return new Col(image.getRGB(texX, texY));
     }
 }

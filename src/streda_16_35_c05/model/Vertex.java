@@ -27,19 +27,19 @@ public class Vertex {
         return color;
     }
 
-    public  double getX(){
+    public double getX(){
         return point.getX();
     }
 
-    public  double getY(){
+    public double getY(){
         return point.getY();
     }
 
-    public  double getZ(){
+    public double getZ(){
         return point.getZ();
     }
 
-    public  double getW(){
+    public double getW(){
         return point.getW();
     }
 

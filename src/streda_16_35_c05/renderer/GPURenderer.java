@@ -26,4 +26,6 @@ public interface GPURenderer {
     boolean isWireframe();
 
     void setWireframe(boolean wireframe);
+
+    Vertex findPoint(Vertex vertex);
 }

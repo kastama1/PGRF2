@@ -264,7 +264,7 @@ public class RendererZBuffer implements GPURenderer {
         }
     }
 
-    private Vertex transformToWindow(Vertex vertex) {
+    public Vertex transformToWindow(Vertex vertex) {
         Vec3D vec3D = new Vec3D(vertex.getPoint())
                 .mul(new Vec3D(1, -1, 1)) // Y jde nahoru a my chceme, aby šlo dolů
                 .add(new Vec3D(1, 1, 0)) // (0,0) je uprostřed a my chceme, aby bylo vlevo nahoře
@@ -335,5 +335,15 @@ public class RendererZBuffer implements GPURenderer {
     @Override
     public void setShader(Shader<Vertex, Col> shader) {
         this.shader = shader;
+    }
+
+    @Override
+    public Vertex findPoint(Vertex vertex) {
+        Vertex a = new Vertex(vertex.getPoint().mul(model).mul(view).mul(projection), vertex.getColor(), vertex.getTextCoord());
+        Optional<Vertex> oA = a.dehomog();
+        a = oA.get();
+        a = transformToWindow(a);
+
+        return a;
     }
 }
