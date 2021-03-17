@@ -14,8 +14,10 @@ import transforms.*;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 
 public class Controller3D {
 
@@ -219,31 +221,9 @@ public class Controller3D {
                     xEdit = e.getX();
                     yEdit = e.getY();
 
-                    double distance = 0;
-                    for (int i = 0; i < vertexBuffer.size(); i++) {
-                        Vertex vertex = vertexBuffer.get(i);
-                        Optional<Vertex> oV = vertex.dehomog();
-                        vertex = oV.get();
-                        vertex = renderer.findPoint(vertex);
-                        double dx = xEdit - vertex.getX();
-                        double dy = yEdit - vertex.getZ();
-                        double d = Math.sqrt((dx * dx) + (dy + dy));
-                        if (d  < 0) {
-                            d = -d;
-                        }
-
-                        if (i == 0) {
-                            distance = d;
-                        }
-
-                        if (distance > d) {
-                            distance = d;
-                            indexEditVertex = i;
-                        }
-                    }
+                    findPoint();
                 }
             }
-
         });
 
         panel.addMouseMotionListener(new MouseAdapter() {
@@ -270,8 +250,10 @@ public class Controller3D {
                     camera = camera
                             .withZenith(Math.toRadians(zenith))
                             .withAzimuth(Math.toRadians(azimuth));
+                    x = e.getX();
+                    y = e.getY();
 
-                } else if(SwingUtilities.isRightMouseButton(e)) {
+                } else if (SwingUtilities.isRightMouseButton(e)) {
                     double speed = 0.01;
 
                     double dx = e.getX() - xEdit;
@@ -280,12 +262,11 @@ public class Controller3D {
                     Vertex vertex = vertexBuffer.get(indexEditVertex);
                     Vertex vertexEdit = new Vertex(new Point3D(vertex.getX() - dx * speed, vertex.getY(), vertex.getZ() - dy * speed), vertex.getColor(), vertex.getTextCoord());
                     vertexBuffer.set(indexEditVertex, vertexEdit);
+
+                    xEdit = e.getX();
+                    yEdit = e.getY();
                 }
                 display();
-                x = e.getX();
-                y = e.getY();
-                xEdit = e.getX();
-                yEdit = e.getY();
             }
         });
 
@@ -482,5 +463,28 @@ public class Controller3D {
             element += " [" + index + "] " + elementBuffer.get(i).getTopologyType().toString();
         }
         return element;
+    }
+
+    private void findPoint() {
+        double distance = 0;
+        for (int i = 0; i < vertexBuffer.size(); i++) {
+            Vertex vertex = vertexBuffer.get(i);
+            vertex = renderer.findPoint(vertex);
+            double dx = xEdit - vertex.getX();
+            double dy = yEdit - vertex.getZ();
+            double d = Math.sqrt((dx * dx) + (dy + dy));
+            if (d < 0) {
+                d = -d;
+            }
+
+            if (i == 0) {
+                distance = d;
+            }
+
+            if (distance > d) {
+                distance = d;
+                indexEditVertex = i;
+            }
+        }
     }
 }

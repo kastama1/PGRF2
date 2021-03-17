@@ -227,41 +227,41 @@ public class RendererZBuffer implements GPURenderer {
         a = transformToWindow(a);
         b = transformToWindow(b);
 
-        int x1 = (int) a.getX();
-        int x2 = (int) b.getX();
-        int y1 = (int) a.getY();
-        int y2 = (int) b.getY();
-
-        if ((x1 == x2) && (y1 == y2)) {
-            drawPixel(x1, y1, a.getZ(), a.getColor());
-
-        } else {
-            int dx = Math.abs(x2 - x1);
-            int dy = Math.abs(y2 - y1);
-            int difference = dx - dy;
-
-            int shift_x, shift_y;
-
-            if (x1 < x2) shift_x = 1; else shift_x = -1;
-            if (y1 < y2) shift_y = 1; else shift_y = -1;
-
-            while ((x1 != x2) || (y1 != y2)) {
-
-                int p = 2 * difference;
-
-                if (p > -dy) {
-                    difference = difference - dy;
-                    x1 = x1 + shift_x;
-                }
-                if (p < dx) {
-                    difference = difference + dx;
-                    y1 = y1 + shift_y;
-                }
-
-                final Col finalColor = shader.shade(a);
-                drawPixel(x1, y1, a.getZ(), finalColor);
-            }
+        if (a.getY() > b.getY()) {
+            Vertex temp = a;
+            a = b;
+            b = temp;
         }
+
+        long start = (long) Math.max(Math.ceil(a.getY()), 0);
+        double end = Math.min(b.getY(), imageRaster.getHeight() - 1);
+
+        for (long y = start; y <= end; y++) {
+            double t = (y - a.getY()) / (b.getY() - a.getY());
+
+            Vertex c = a.mul(1 - t).add((b.mul(t)));
+
+            drawPixel((int) c.getX(), (int) y, c.getZ(), c.getColor());
+        }
+
+
+        if (a.getX() > b.getX()) {
+            Vertex temp = a;
+            a = b;
+            b = temp;
+        }
+
+        start = (long) Math.max(Math.ceil(a.getX()), 0);
+        end = Math.min(b.getX(), imageRaster.getWidth() - 1);
+
+        for (long x = start; x <= end; x++) {
+            double t = (x - a.getX()) / (b.getX() - a.getX());
+
+            Vertex c = a.mul(1 - t).add((b.mul(t)));
+
+            drawPixel((int) x, (int) c.getY(), c.getZ(), c.getColor());
+        }
+
     }
 
     public Vertex transformToWindow(Vertex vertex) {
