@@ -6,8 +6,8 @@ import transforms.Mat4Identity;
 public class Element {
 
     private final TopologyType topologyType;
-    private final int start; // na jakém indexu v ib začít
-    private final int count; // kolik indexů z IB celkem použit
+    private final int start;
+    private final int count;
     private Mat4 model;
 
     public Element(TopologyType topologyType, int start, int count) {

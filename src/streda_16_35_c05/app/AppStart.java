@@ -11,10 +11,8 @@ public class AppStart {
         SwingUtilities.invokeLater(() -> {
             Window window = new Window();
             new Controller3D(window.getPanel());
-            window.setVisible(true); // zobrazit okno
+            window.setVisible(true);
         });
-        // https://www.google.com/search?q=SwingUtilities.invokeLater
-        // https://www.javamex.com/tutorials/threads/invokelater.shtml
     }
 
 }

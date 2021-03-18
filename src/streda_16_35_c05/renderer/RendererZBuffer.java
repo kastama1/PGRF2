@@ -62,10 +62,9 @@ public class RendererZBuffer implements GPURenderer {
     }
 
     private void prepareTriangle(Vertex v1, Vertex v2, Vertex v3) {
-
-        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor(), v1.getTextCoord());
-        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor(), v2.getTextCoord());
-        Vertex c = new Vertex(v3.getPoint().mul(model).mul(view).mul(projection), v3.getColor(), v3.getTextCoord());
+        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor(), v1.getTextCoord(), v1.getOne());
+        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor(), v2.getTextCoord(), v2.getOne());
+        Vertex c = new Vertex(v3.getPoint().mul(model).mul(view).mul(projection), v3.getColor(), v3.getTextCoord(), v3.getOne());
 
         if ((a.getX() > a.getW() && b.getX() > b.getW() && c.getX() > c.getW()) ||
                 (a.getX() < -a.getW() && b.getX() < -b.getW() && c.getX() < -c.getW()) ||
@@ -116,9 +115,8 @@ public class RendererZBuffer implements GPURenderer {
     }
 
     private void prepareLine(Vertex v1, Vertex v2) {
-
-        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor(), v1.getTextCoord());
-        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor(), v2.getTextCoord());
+        Vertex a = new Vertex(v1.getPoint().mul(model).mul(view).mul(projection), v1.getColor(), v1.getTextCoord(), v1.getOne());
+        Vertex b = new Vertex(v2.getPoint().mul(model).mul(view).mul(projection), v2.getColor(), v2.getTextCoord(), v2.getOne());
 
         if ((a.getX() > a.getW() && b.getX() > b.getW()) ||
                 (a.getX() < -a.getW() && b.getX() < -b.getW()) ||
@@ -155,6 +153,7 @@ public class RendererZBuffer implements GPURenderer {
     }
 
     private void drawTriangle(Vertex a, Vertex b, Vertex c) {
+
         Optional<Vertex> oA = a.dehomog();
         Optional<Vertex> oB = b.dehomog();
         Optional<Vertex> oC = c.dehomog();
@@ -241,7 +240,10 @@ public class RendererZBuffer implements GPURenderer {
 
             Vertex c = a.mul(1 - t).add((b.mul(t)));
 
-            drawPixel((int) c.getX(), (int) y, c.getZ(), c.getColor());
+            Vertex finalVertex = new Vertex(c.getPoint(), c.getColor().mul(1 / c.getOne()), c.getTextCoord().mul(1 / c.getOne()));
+            final Col finalColor = shader.shade(finalVertex);
+
+            drawPixel((int) finalVertex.getX(), (int) y, finalVertex.getZ(), finalColor);
         }
 
 
@@ -259,7 +261,11 @@ public class RendererZBuffer implements GPURenderer {
 
             Vertex c = a.mul(1 - t).add((b.mul(t)));
 
-            drawPixel((int) x, (int) c.getY(), c.getZ(), c.getColor());
+            Vertex finalVertex = new Vertex(c.getPoint(), c.getColor().mul(1 / c.getOne()), c.getTextCoord().mul(1 / c.getOne()));
+            final Col finalColor = shader.shade(finalVertex);
+
+
+            drawPixel((int) x, (int) finalVertex.getY(), finalVertex.getZ(), finalColor);
         }
 
     }
@@ -271,7 +277,7 @@ public class RendererZBuffer implements GPURenderer {
                 // máme <0;2> -> vynásobíme polovinou velikosti plátna
                 .mul(new Vec3D(imageRaster.getWidth() / 2f, imageRaster.getHeight() / 2f, 1));
 
-        return new Vertex(new Point3D(vec3D), vertex.getColor(), vertex.getTextCoord());
+        return new Vertex(new Point3D(vec3D), vertex.getColor(), vertex.getTextCoord(), vertex.getOne());
     }
 
     private void fillLine(long y, Vertex a, Vertex b) {
@@ -286,9 +292,12 @@ public class RendererZBuffer implements GPURenderer {
 
         for (long x = start; x <= end; x++) {
             double t = (x - a.getX()) / (b.getX() - a.getX());
-            Vertex finalVertex = a.mul(1 - t).add(b.mul(t));
 
+            Vertex c = a.mul(1 - t).add(b.mul(t));
+
+            Vertex finalVertex = new Vertex(c.getPoint(), c.getColor().mul(1 / c.getOne()), c.getTextCoord().mul(1 / c.getOne()));
             final Col finalColor = shader.shade(finalVertex);
+
             drawPixel((int) x, (int) y, finalVertex.getZ(), finalColor);
         }
     }

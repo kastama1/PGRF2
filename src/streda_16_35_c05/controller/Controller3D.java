@@ -34,7 +34,8 @@ public class Controller3D {
     Shader<Vertex, Col> shader;
     Shader<Vertex, Col> shaderTexture;
 
-    private Mat4 model, projection, mtScale, mtRotationX, mtRotationY, mtRotationZ, mtTransl;
+    private Mat4 model;
+    private Mat4 projection;
     private Vec3D transl;
 
     private Camera camera;
@@ -73,115 +74,115 @@ public class Controller3D {
     }
 
     private void createScene() {
-        vertexBuffer.add(new Vertex(new Point3D(.5, .0, .9), new Col(255, 0, 0), new Vec2D(0, 0))); //0
-        vertexBuffer.add(new Vertex(new Point3D(.7, .7, .9), new Col(255, 120, 0), new Vec2D(0, 0))); //1
-        vertexBuffer.add(new Vertex(new Point3D(.0, .5, .3), new Col(255, 255, 0), new Vec2D(0, 0))); //2
+        vertexBuffer.add(new Vertex(new Point3D(.5, .0, .9), new Col(255, 0, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(.7, .7, .9), new Col(255, 120, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(.0, .5, .3), new Col(255, 255, 0)));
 
-        vertexBuffer.add(new Vertex(new Point3D(.3, .8, .5), new Col(0, 255, 0), new Vec2D(0, 0))); //3
-        vertexBuffer.add(new Vertex(new Point3D(.1, .2, 1), new Col(0, 255, 120), new Vec2D(0, 0))); //4
-        vertexBuffer.add(new Vertex(new Point3D(.7, .3, .2), new Col(0, 255, 255), new Vec2D(0, 0))); //5
+        vertexBuffer.add(new Vertex(new Point3D(.3, .8, .5), new Col(0, 255, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(.1, .2, 1), new Col(0, 255, 120)));
+        vertexBuffer.add(new Vertex(new Point3D(.7, .3, .2), new Col(0, 255, 255)));
 
-        vertexBuffer.add(new Vertex(new Point3D(0, 0, 0), new Col(255, 0, 0), new Vec2D(0, 0))); //6
-        vertexBuffer.add(new Vertex(new Point3D(5, 0, 0), new Col(255, 0, 0), new Vec2D(0, 0))); //7
-        vertexBuffer.add(new Vertex(new Point3D(4.8, .2, 0), new Col(255, 0, 0), new Vec2D(0, 0))); //8
-        vertexBuffer.add(new Vertex(new Point3D(4.8, -.2, 0), new Col(255, 0, 0), new Vec2D(0, 0))); //9
+        vertexBuffer.add(new Vertex(new Point3D(0, 0, 0), new Col(255, 0, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(5, 0, 0), new Col(255, 0, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(4.8, .2, 0), new Col(255, 0, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(4.8, -.2, 0), new Col(255, 0, 0)));
 
-        vertexBuffer.add(new Vertex(new Point3D(0, 0, 0), new Col(0, 255, 0), new Vec2D(0, 0))); //10
-        vertexBuffer.add(new Vertex(new Point3D(0, 5, 0), new Col(0, 255, 0), new Vec2D(0, 0))); //11
-        vertexBuffer.add(new Vertex(new Point3D(.2, 4.8, 0), new Col(0, 255, 0), new Vec2D(0, 0))); //12
-        vertexBuffer.add(new Vertex(new Point3D(-.2, 4.8, 0), new Col(0, 255, 0), new Vec2D(0, 0))); //13
+        vertexBuffer.add(new Vertex(new Point3D(0, 0, 0), new Col(0, 255, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(0, 5, 0), new Col(0, 255, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(.2, 4.8, 0), new Col(0, 255, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(-.2, 4.8, 0), new Col(0, 255, 0)));
 
-        vertexBuffer.add(new Vertex(new Point3D(0, 0, 0), new Col(0, 0, 255), new Vec2D(0, 0))); //14
-        vertexBuffer.add(new Vertex(new Point3D(0, 0, 5), new Col(0, 0, 255), new Vec2D(0, 0))); //15
-        vertexBuffer.add(new Vertex(new Point3D(-.1, .1, 4.8), new Col(0, 0, 255), new Vec2D(0, 0))); //16
-        vertexBuffer.add(new Vertex(new Point3D(.1, -.1, 4.8), new Col(0, 0, 255), new Vec2D(0, 0))); //17
+        vertexBuffer.add(new Vertex(new Point3D(0, 0, 0), new Col(0, 0, 255)));
+        vertexBuffer.add(new Vertex(new Point3D(0, 0, 5), new Col(0, 0, 255)));
+        vertexBuffer.add(new Vertex(new Point3D(-.1, .1, 4.8), new Col(0, 0, 255)));
+        vertexBuffer.add(new Vertex(new Point3D(.1, -.1, 4.8), new Col(0, 0, 255)));
 
-        vertexBuffer.add(new Vertex(new Point3D(1, 1, 2), new Col(100, 0, 0), new Vec2D(0, 0))); //18
-        vertexBuffer.add(new Vertex(new Point3D(1, 1, 3), new Col(0, 100, 0), new Vec2D(0, 0))); //19
-        vertexBuffer.add(new Vertex(new Point3D(2, 1, 3), new Col(0, 0, 100), new Vec2D(0, 1))); //20 textura
-        vertexBuffer.add(new Vertex(new Point3D(2, 1, 2), new Col(100, 100, 100), new Vec2D(1, 1))); //21 textura
+        vertexBuffer.add(new Vertex(new Point3D(1, 1, 2), new Col(100, 0, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(1, 1, 3), new Col(0, 100, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(2, 1, 3), new Col(0, 0, 100), new Vec2D(0, 1)));
+        vertexBuffer.add(new Vertex(new Point3D(2, 1, 2), new Col(100, 100, 100), new Vec2D(1, 1)));
 
-        vertexBuffer.add(new Vertex(new Point3D(1, 2, 2), new Col(200, 0, 0), new Vec2D(0, 0))); //22
-        vertexBuffer.add(new Vertex(new Point3D(1, 2, 3), new Col(0, 200, 0), new Vec2D(0, 0))); //23
-        vertexBuffer.add(new Vertex(new Point3D(2, 2, 3), new Col(0, 0, 200), new Vec2D(0, 0))); //24 textura
-        vertexBuffer.add(new Vertex(new Point3D(2, 2, 2), new Col(200, 200, 200), new Vec2D(1, 0))); //25 textura
+        vertexBuffer.add(new Vertex(new Point3D(1, 2, 2), new Col(200, 0, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(1, 2, 3), new Col(0, 200, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(2, 2, 3), new Col(0, 0, 200), new Vec2D(0, 0)));
+        vertexBuffer.add(new Vertex(new Point3D(2, 2, 2), new Col(200, 200, 200), new Vec2D(1, 0)));
 
-        indexBuffer.add(0); //0
-        indexBuffer.add(2); //1
-        indexBuffer.add(1); //2
+        indexBuffer.add(0);
+        indexBuffer.add(2);
+        indexBuffer.add(1);
 
-        indexBuffer.add(3); //3
-        indexBuffer.add(4); //4
-        indexBuffer.add(5); //5
+        indexBuffer.add(3);
+        indexBuffer.add(4);
+        indexBuffer.add(5);
 
-        indexBuffer.add(6); //6
-        indexBuffer.add(7); //7
+        indexBuffer.add(6);
+        indexBuffer.add(7);
 
-        indexBuffer.add(10); //8
-        indexBuffer.add(11); //9
+        indexBuffer.add(10);
+        indexBuffer.add(11);
 
-        indexBuffer.add(14); //10
-        indexBuffer.add(15); //11
+        indexBuffer.add(14);
+        indexBuffer.add(15);
 
-        indexBuffer.add(7); //12
-        indexBuffer.add(8); //13
-        indexBuffer.add(9); //14
+        indexBuffer.add(7);
+        indexBuffer.add(8);
+        indexBuffer.add(9);
 
-        indexBuffer.add(11); //15
-        indexBuffer.add(12); //16
-        indexBuffer.add(13); //17
+        indexBuffer.add(11);
+        indexBuffer.add(12);
+        indexBuffer.add(13);
 
-        indexBuffer.add(15); //18
-        indexBuffer.add(16); //19
-        indexBuffer.add(17); //20
+        indexBuffer.add(15);
+        indexBuffer.add(16);
+        indexBuffer.add(17);
 
-        indexBuffer.add(18); //21
-        indexBuffer.add(19); //22
-        indexBuffer.add(20); //23
+        indexBuffer.add(18);
+        indexBuffer.add(19);
+        indexBuffer.add(20);
 
-        indexBuffer.add(18); //24
-        indexBuffer.add(20); //25
-        indexBuffer.add(21); //26
+        indexBuffer.add(18);
+        indexBuffer.add(20);
+        indexBuffer.add(21);
 
-        indexBuffer.add(22); //27
-        indexBuffer.add(23); //28
-        indexBuffer.add(24); //29
+        indexBuffer.add(22);
+        indexBuffer.add(23);
+        indexBuffer.add(24);
 
-        indexBuffer.add(22); //30
-        indexBuffer.add(24); //31
-        indexBuffer.add(25); //32
+        indexBuffer.add(22);
+        indexBuffer.add(24);
+        indexBuffer.add(25);
 
-        indexBuffer.add(18); //33
-        indexBuffer.add(22); //34
-        indexBuffer.add(25); //35
+        indexBuffer.add(18);
+        indexBuffer.add(22);
+        indexBuffer.add(25);
 
-        indexBuffer.add(18); //36
-        indexBuffer.add(21); //37
-        indexBuffer.add(25); //38
+        indexBuffer.add(18);
+        indexBuffer.add(21);
+        indexBuffer.add(25);
 
-        indexBuffer.add(19); //39
-        indexBuffer.add(23); //40
-        indexBuffer.add(24); //41
+        indexBuffer.add(19);
+        indexBuffer.add(23);
+        indexBuffer.add(24);
 
-        indexBuffer.add(19); //42
-        indexBuffer.add(24); //43
-        indexBuffer.add(20); //44
+        indexBuffer.add(19);
+        indexBuffer.add(24);
+        indexBuffer.add(20);
 
-        indexBuffer.add(18); //45
-        indexBuffer.add(22); //46
-        indexBuffer.add(19); //47
+        indexBuffer.add(18);
+        indexBuffer.add(22);
+        indexBuffer.add(19);
 
-        indexBuffer.add(19); //48
-        indexBuffer.add(22); //49
-        indexBuffer.add(23); //50
+        indexBuffer.add(19);
+        indexBuffer.add(22);
+        indexBuffer.add(23);
 
-        indexBuffer.add(21); //51
-        indexBuffer.add(20); //52
-        indexBuffer.add(25); //53
+        indexBuffer.add(21);
+        indexBuffer.add(20);
+        indexBuffer.add(25);
 
-        indexBuffer.add(25); //54
-        indexBuffer.add(24); //55
-        indexBuffer.add(20); //56
+        indexBuffer.add(25);
+        indexBuffer.add(24);
+        indexBuffer.add(20);
 
         elementBufferAxis.add(new Element(TopologyType.LINE, 6, 6));
         elementBufferAxis.add(new Element(TopologyType.TRIANGLE, 12, 9));
@@ -190,10 +191,9 @@ public class Controller3D {
         elementBuffer.add(new Element(TopologyType.TRIANGLE, 3, 3));
         elementBuffer.add(new Element(TopologyType.TRIANGLE, 21, 28));
 
-        shader = v -> new Col(255, 255, 255);
-
         elementBufferTexture.add(new Element(TopologyType.TRIANGLE, 51, 6));
 
+        shader = new BasicColorShader();
         shaderTexture = new TextureShader();
     }
 
@@ -325,7 +325,7 @@ public class Controller3D {
                     rh = !rh;
                     projection();
                 } else if (e.getKeyCode() == KeyEvent.VK_F) {
-                    if (timerRun == false) {
+                    if (!timerRun) {
                         timerRun = true;
                         timer = new Timer();
                         timer.schedule(new TimerTask() {
@@ -339,7 +339,7 @@ public class Controller3D {
                         }, 0, 1000 / 20);
                     }
                 } else if (e.getKeyCode() == KeyEvent.VK_G) {
-                    if (timerRun == true) {
+                    if (timerRun) {
                         timer.cancel();
                         timerRun = false;
                     }
@@ -366,8 +366,7 @@ public class Controller3D {
                 .withAzimuth(Math.toRadians(-135))
                 .withZenith(Math.toRadians(-5));
 
-        for (int i = 0; i < elementBuffer.size(); i++) {
-            element = elementBuffer.get(i);
+        for (Element element : elementBuffer) {
             element.setModel(model);
         }
 
@@ -388,15 +387,14 @@ public class Controller3D {
     }
 
     private void transform() {
-        mtScale = new Mat4Scale(scale);
-        mtRotationX = new Mat4RotX(Math.toRadians(rotationX));
-        mtRotationY = new Mat4RotY(Math.toRadians(rotationY));
-        mtRotationZ = new Mat4RotZ(Math.toRadians(rotationZ));
-        mtTransl = new Mat4Transl(transl);
+        Mat4 mtScale = new Mat4Scale(scale);
+        Mat4 mtRotationX = new Mat4RotX(Math.toRadians(rotationX));
+        Mat4 mtRotationY = new Mat4RotY(Math.toRadians(rotationY));
+        Mat4 mtRotationZ = new Mat4RotZ(Math.toRadians(rotationZ));
+        Mat4 mtTransl = new Mat4Transl(transl);
 
         if (activeSolid == 0) {
-            for (int i = 0; i < elementBuffer.size(); i++) {
-                element = elementBuffer.get(i);
+            for (Element element : elementBuffer) {
                 model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
                 element.setModel(model);
                 element = elementBufferTexture.get(0);
@@ -430,13 +428,10 @@ public class Controller3D {
 
         renderer.setView(camera.getViewMatrix());
         renderer.setProjection(projection);
+        renderer.setShader(shader);
 
-        renderer.setShader(new BasicColorShader());
         renderer.draw(elementBufferAxis, indexBuffer, vertexBuffer);
 
-        if (renderer.isWireframe()) {
-            renderer.setShader(shader);
-        }
         renderer.draw(elementBuffer, indexBuffer, vertexBuffer);
 
         if (!renderer.isWireframe()) {
@@ -470,15 +465,12 @@ public class Controller3D {
         for (int i = 0; i < vertexBuffer.size(); i++) {
             Vertex vertex = vertexBuffer.get(i);
             vertex = renderer.findPoint(vertex);
-            double dx = xEdit - vertex.getX();
-            double dy = yEdit - vertex.getZ();
-            double d = Math.sqrt((dx * dx) + (dy + dy));
-            if (d < 0) {
-                d = -d;
-            }
+
+            double d = Math.sqrt(Math.pow(xEdit - vertex.getX(), 2) + Math.pow(yEdit - vertex.getY(), 2));
 
             if (i == 0) {
                 distance = d;
+                indexEditVertex = i;
             }
 
             if (distance > d) {
