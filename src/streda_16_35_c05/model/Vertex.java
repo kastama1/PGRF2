@@ -16,7 +16,7 @@ public class Vertex {
     public Vertex(Point3D point, Col color) {
         this.point = point;
         this.color = color;
-        this.textCoord = new Vec2D(0,0);
+        this.textCoord = new Vec2D(0, 0);
         this.one = 1.0;
     }
 

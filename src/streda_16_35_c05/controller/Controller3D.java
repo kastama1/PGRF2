@@ -189,7 +189,7 @@ public class Controller3D {
 
         elementBuffer.add(new Element(TopologyType.TRIANGLE, 0, 3));
         elementBuffer.add(new Element(TopologyType.TRIANGLE, 3, 3));
-        elementBuffer.add(new Element(TopologyType.TRIANGLE, 21, 28));
+        elementBuffer.add(new Element(TopologyType.TRIANGLE, 21, 30));
 
         elementBufferTexture.add(new Element(TopologyType.TRIANGLE, 51, 6));
 
@@ -197,7 +197,241 @@ public class Controller3D {
         shaderTexture = new TextureShader();
     }
 
-    public void initListener() {
+    private void createCube() {
+        if (elementBuffer.size() < 8) {
+            vertexBuffer.add(new Vertex(new Point3D(0, 0, 0), new Col(150, 150, 150)));
+            vertexBuffer.add(new Vertex(new Point3D(0, 0, 1), new Col(50, 50, 50)));
+            vertexBuffer.add(new Vertex(new Point3D(1, 0, 1), new Col(150, 150, 150)));
+            vertexBuffer.add(new Vertex(new Point3D(1, 0, 0), new Col(50, 50, 50)));
+
+            vertexBuffer.add(new Vertex(new Point3D(0, 1, 0), new Col(100, 200, 255)));
+            vertexBuffer.add(new Vertex(new Point3D(0, 1, 1), new Col(0, 200, 0)));
+            vertexBuffer.add(new Vertex(new Point3D(1, 1, 1), new Col(100, 200, 255)));
+            vertexBuffer.add(new Vertex(new Point3D(1, 1, 0), new Col(200, 200, 200)));
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 7);
+            indexBuffer.add(vertexBuffer.size() - 6);
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 6);
+            indexBuffer.add(vertexBuffer.size() - 5);
+
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 3);
+            indexBuffer.add(vertexBuffer.size() - 2);
+
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 2);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 5);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 7);
+            indexBuffer.add(vertexBuffer.size() - 3);
+            indexBuffer.add(vertexBuffer.size() - 2);
+
+            indexBuffer.add(vertexBuffer.size() - 7);
+            indexBuffer.add(vertexBuffer.size() - 2);
+            indexBuffer.add(vertexBuffer.size() - 6);
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 7);
+
+            indexBuffer.add(vertexBuffer.size() - 7);
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 3);
+
+            indexBuffer.add(vertexBuffer.size() - 5);
+            indexBuffer.add(vertexBuffer.size() - 6);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 1);
+            indexBuffer.add(vertexBuffer.size() - 2);
+            indexBuffer.add(vertexBuffer.size() - 6);
+
+            int start = 0;
+            int count = 0;
+            for (Element element : elementBufferAxis) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            for (Element element : elementBuffer) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            for (Element element : elementBufferTexture) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            elementBuffer.add(new Element(TopologyType.TRIANGLE, start + count, 36));
+        }
+    }
+
+    private void createBlock() {
+        if (elementBuffer.size() < 8) {
+            vertexBuffer.add(new Vertex(new Point3D(0, 0, 0), new Col(100, 100, 100)));
+            vertexBuffer.add(new Vertex(new Point3D(0, 0, 1), new Col(200, 0, 0)));
+            vertexBuffer.add(new Vertex(new Point3D(2, 0, 1), new Col(100, 100, 100)));
+            vertexBuffer.add(new Vertex(new Point3D(2, 0, 0), new Col(200, 0, 0)));
+
+            vertexBuffer.add(new Vertex(new Point3D(0, 1, 0), new Col(40, 20, 60)));
+            vertexBuffer.add(new Vertex(new Point3D(0, 1, 1), new Col(0, 200, 0)));
+            vertexBuffer.add(new Vertex(new Point3D(2, 1, 1), new Col(40, 20, 60)));
+            vertexBuffer.add(new Vertex(new Point3D(2, 1, 0), new Col(0, 200, 0)));
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 7);
+            indexBuffer.add(vertexBuffer.size() - 6);
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 6);
+            indexBuffer.add(vertexBuffer.size() - 5);
+
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 3);
+            indexBuffer.add(vertexBuffer.size() - 2);
+
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 2);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 5);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 7);
+            indexBuffer.add(vertexBuffer.size() - 3);
+            indexBuffer.add(vertexBuffer.size() - 2);
+
+            indexBuffer.add(vertexBuffer.size() - 7);
+            indexBuffer.add(vertexBuffer.size() - 2);
+            indexBuffer.add(vertexBuffer.size() - 6);
+
+            indexBuffer.add(vertexBuffer.size() - 8);
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 7);
+
+            indexBuffer.add(vertexBuffer.size() - 7);
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 3);
+
+            indexBuffer.add(vertexBuffer.size() - 5);
+            indexBuffer.add(vertexBuffer.size() - 6);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 1);
+            indexBuffer.add(vertexBuffer.size() - 2);
+            indexBuffer.add(vertexBuffer.size() - 6);
+
+            int start = 0;
+            int count = 0;
+            for (Element element : elementBufferAxis) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            for (Element element : elementBuffer) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            for (Element element : elementBufferTexture) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            elementBuffer.add(new Element(TopologyType.TRIANGLE, start + count, 36));
+        }
+    }
+
+    private void createPyramid() {
+        if (elementBuffer.size() < 8) {
+            vertexBuffer.add(new Vertex(new Point3D(0, 0, 1), new Col(100, 0, 0)));
+            vertexBuffer.add(new Vertex(new Point3D(0, 1, 1), new Col(0, 100, 0)));
+            vertexBuffer.add(new Vertex(new Point3D(1, 0, 1), new Col(200, 0, 0)));
+            vertexBuffer.add(new Vertex(new Point3D(1, 1, 1), new Col(0, 200, 0)));
+
+            vertexBuffer.add(new Vertex(new Point3D(0.5, 0.5, 3), new Col(0, 0, 200)));
+
+            indexBuffer.add(vertexBuffer.size() - 5);
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 3);
+
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 3);
+            indexBuffer.add(vertexBuffer.size() - 2);
+
+            indexBuffer.add(vertexBuffer.size() - 5);
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 4);
+            indexBuffer.add(vertexBuffer.size() - 2);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 5);
+            indexBuffer.add(vertexBuffer.size() - 3);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            indexBuffer.add(vertexBuffer.size() - 3);
+            indexBuffer.add(vertexBuffer.size() - 2);
+            indexBuffer.add(vertexBuffer.size() - 1);
+
+            int start = 0;
+            int count = 0;
+            for (Element element : elementBufferAxis) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            for (Element element : elementBuffer) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            for (Element element : elementBufferTexture) {
+                if (element.getStart() > start) {
+                    start = element.getStart();
+                    count = element.getCount();
+                }
+            }
+
+            elementBuffer.add(new Element(TopologyType.TRIANGLE, start + count, 18));
+        }
+    }
+
+    private void initListener() {
         panel.addMouseWheelListener(new MouseAdapter() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
@@ -300,7 +534,13 @@ public class Controller3D {
                 } else if (e.getKeyCode() == KeyEvent.VK_O) {
                     transl = new Vec3D(0, 0, 0 + step);
                 } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    vertexBuffer.clear();
+                    indexBuffer.clear();
+                    elementBufferAxis.clear();
+                    elementBuffer.clear();
+                    elementBufferTexture.clear();
                     initMatrices();
+                    createScene();
                 } else if (e.getKeyCode() == KeyEvent.VK_NUMPAD4) {
                     rotationX += 10;
                 } else if (e.getKeyCode() == KeyEvent.VK_NUMPAD7) {
@@ -351,6 +591,22 @@ public class Controller3D {
                     activeSolid = 2;
                 } else if (e.getKeyCode() == KeyEvent.VK_4) {
                     activeSolid = 3;
+                } else if (e.getKeyCode() == KeyEvent.VK_5 && elementBuffer.size() >= 4) {
+                    activeSolid = 4;
+                } else if (e.getKeyCode() == KeyEvent.VK_6 && elementBuffer.size() >= 5) {
+                    activeSolid = 5;
+                } else if (e.getKeyCode() == KeyEvent.VK_7 && elementBuffer.size() >= 6) {
+                    activeSolid = 6;
+                } else if (e.getKeyCode() == KeyEvent.VK_8 && elementBuffer.size() >= 7) {
+                    activeSolid = 7;
+                } else if (e.getKeyCode() == KeyEvent.VK_9 && elementBuffer.size() >= 8) {
+                    activeSolid = 8;
+                } else if (e.getKeyCode() == KeyEvent.VK_X) {
+                    createCube();
+                } else if (e.getKeyCode() == KeyEvent.VK_C) {
+                    createPyramid();
+                } else if (e.getKeyCode() == KeyEvent.VK_V) {
+                    createBlock();
                 }
                 display();
             }
@@ -397,9 +653,9 @@ public class Controller3D {
             for (Element element : elementBuffer) {
                 model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
                 element.setModel(model);
-                element = elementBufferTexture.get(0);
-                element.setModel(model);
             }
+            element = elementBufferTexture.get(0);
+            element.setModel(elementBuffer.get(2).getModel());
         } else if (activeSolid == 3) {
             element = elementBuffer.get(activeSolid - 1);
             model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
@@ -455,7 +711,7 @@ public class Controller3D {
         int index;
         for (int i = 0; i < elementBuffer.size(); i++) {
             index = i + 2;
-            element += " [" + index + "] " + elementBuffer.get(i).getTopologyType().toString();
+            element += " [" + index + "] Element " + i;
         }
         return element;
     }

@@ -6,7 +6,6 @@ import streda_16_35_c05.shader.Shader;
 import transforms.Col;
 import transforms.Mat4;
 
-import java.awt.*;
 import java.util.List;
 
 public interface GPURenderer {
@@ -16,9 +15,7 @@ public interface GPURenderer {
     void clear();
 
     void setShader(Shader<Vertex, Col> shader);
-
-    void setModel(Mat4 model);
-
+    
     void setView(Mat4 view);
 
     void setProjection(Mat4 projection);

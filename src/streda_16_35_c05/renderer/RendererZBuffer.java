@@ -272,9 +272,8 @@ public class RendererZBuffer implements GPURenderer {
 
     public Vertex transformToWindow(Vertex vertex) {
         Vec3D vec3D = new Vec3D(vertex.getPoint())
-                .mul(new Vec3D(1, -1, 1)) // Y jde nahoru a my chceme, aby šlo dolů
-                .add(new Vec3D(1, 1, 0)) // (0,0) je uprostřed a my chceme, aby bylo vlevo nahoře
-                // máme <0;2> -> vynásobíme polovinou velikosti plátna
+                .mul(new Vec3D(1, -1, 1))
+                .add(new Vec3D(1, 1, 0))
                 .mul(new Vec3D(imageRaster.getWidth() / 2f, imageRaster.getHeight() / 2f, 1));
 
         return new Vertex(new Point3D(vec3D), vertex.getColor(), vertex.getTextCoord(), vertex.getOne());
@@ -317,11 +316,6 @@ public class RendererZBuffer implements GPURenderer {
     }
 
     @Override
-    public void setModel(Mat4 model) {
-        this.model = model;
-    }
-
-    @Override
     public void setView(Mat4 view) {
         this.view = view;
     }
@@ -350,6 +344,9 @@ public class RendererZBuffer implements GPURenderer {
     public Vertex findPoint(Vertex vertex) {
         Vertex a = new Vertex(vertex.getPoint().mul(model).mul(view).mul(projection), vertex.getColor(), vertex.getTextCoord());
         Optional<Vertex> oA = a.dehomog();
+
+        if (oA.isEmpty()) return null;
+
         a = oA.get();
         a = transformToWindow(a);
 
