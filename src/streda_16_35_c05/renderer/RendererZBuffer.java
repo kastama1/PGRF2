@@ -16,7 +16,7 @@ public class RendererZBuffer implements GPURenderer {
     private final Raster<Integer> imageRaster;
     private final Raster<Double> depthBuffer;
 
-    boolean wireframe = false;
+    private boolean wireframe = false;
 
     private Mat4 model, view, projection;
     private Shader<Vertex, Col> shader;
@@ -270,7 +270,7 @@ public class RendererZBuffer implements GPURenderer {
 
     }
 
-    public Vertex transformToWindow(Vertex vertex) {
+    private Vertex transformToWindow(Vertex vertex) {
         Vec3D vec3D = new Vec3D(vertex.getPoint())
                 .mul(new Vec3D(1, -1, 1))
                 .add(new Vec3D(1, 1, 0))

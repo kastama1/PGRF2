@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class TextureShader implements Shader<Vertex, Col> {
 
-    BufferedImage image;
+    private BufferedImage image;
 
     public TextureShader() {
         try {

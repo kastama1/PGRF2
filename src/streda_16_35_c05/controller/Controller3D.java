@@ -31,8 +31,8 @@ public class Controller3D {
     private final List<Integer> indexBuffer;
     private final List<Vertex> vertexBuffer;
 
-    Shader<Vertex, Col> shader;
-    Shader<Vertex, Col> shaderTexture;
+    private Shader<Vertex, Col> shader;
+    private Shader<Vertex, Col> shaderTexture;
 
     private Mat4 model;
     private Mat4 projection;
@@ -40,17 +40,16 @@ public class Controller3D {
 
     private Camera camera;
 
-    double rotationX, rotationY, rotationZ;
-    double scale = 1;
-    boolean rh = true;
-    int activeSolid = 0;
-    Element element;
-    int indexEditVertex;
+    private double rotationX, rotationY, rotationZ;
+    private double scale = 1;
+    private boolean rh = true;
+    private int activeSolid = 0;
+    private int indexEditVertex;
 
-    Timer timer;
-    boolean timerRun = false;
+    private Timer timer;
+    private boolean timerRun = false;
 
-    double x, y, xEdit, yEdit;
+    private double x, y, xEdit, yEdit;
 
     public Controller3D(Panel panel) {
         this.panel = panel;
@@ -638,7 +637,7 @@ public class Controller3D {
                     50
             );
         } else {
-            projection = new Mat4OrthoRH(imageRaster.getWidth() / 100, imageRaster.getHeight() / 100, 0.1, 50);
+            projection = new Mat4OrthoRH(imageRaster.getWidth() / 100f, imageRaster.getHeight() / 100f, 0.1, 50);
         }
     }
 
@@ -654,16 +653,17 @@ public class Controller3D {
                 model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
                 element.setModel(model);
             }
-            element = elementBufferTexture.get(0);
+            // vhodnější zápis
+            Element element = elementBufferTexture.get(0);
             element.setModel(elementBuffer.get(2).getModel());
         } else if (activeSolid == 3) {
-            element = elementBuffer.get(activeSolid - 1);
+            Element element = elementBuffer.get(activeSolid - 1);
             model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
             element.setModel(model);
             element = elementBufferTexture.get(0);
             element.setModel(model);
         } else {
-            element = elementBuffer.get(activeSolid - 1);
+            Element element = elementBuffer.get(activeSolid - 1);
             model = element.getModel().mul(mtScale).mul(mtTransl).mul(mtRotationX).mul(mtRotationY).mul(mtRotationZ);
             element.setModel(model);
         }
@@ -707,13 +707,16 @@ public class Controller3D {
     }
 
     private String element() {
-        String element = "";
-        int index;
+        StringBuilder element = new StringBuilder(); // StringBuilder je lepší (a při větším počtu změn znatelně rychlejší)
         for (int i = 0; i < elementBuffer.size(); i++) {
-            index = i + 2;
-            element += " [" + index + "] Element " + i;
+            // "index" lepší takto a nechat JVM zoptimalizovat
+            int index = i + 2;
+            element.append(" [")
+                    .append(index)
+                    .append("] Element ")
+                    .append(i);
         }
-        return element;
+        return element.toString();
     }
 
     private void findPoint() {
